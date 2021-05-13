@@ -1,0 +1,50 @@
+name: Build Aurora
+on:
+  push:
+    branches: [ master, dev ]
+  pull_request:
+    branches: [ dev ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Find Version Numver
+        uses: oprypin/find-latest-tag@v1
+        with:
+          repository: nzbr/Aurora
+          releases-only: false
+        id: version
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Setup InnoSetup
+        uses: crazy-max/ghaction-chocolatey@v1
+        with:
+          args: install InnoSetup --accept-license
+
+      - name: Restore Nuget Packages
+        run: MSBuild Project-Aurora\Project-Aurora.sln -t:restore
+
+      - name: Build Solution
+        run: MSBuild Project-Aurora\Project-Aurora.sln -p:Configuration=Release
+
+      - name: Package Installer
+        run: ISCC.exe /DEXTERNAL_VERSION=${{ steps.version.outputs.tag }}-nzbr Installer\installer.iss
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: Aurora ${{ steps.version.outputs.tag }}-nzbr Installer
+          path: Aurora-setup-${{ steps.version.outputs.tag }}-nzbr.exe
+
+

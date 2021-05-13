@@ -4,13 +4,13 @@
  #if len(EXTERNAL_VERSION)>0
      #define public Version EXTERNAL_VERSION
  #endif
-#endif 
+#endif
 
 [Setup]
 AppId={{9444602B-C5D8-4EF5-9D5B-E76D06B53C71}
 AppName=Aurora
-AppVersion=v{#Version}
-AppVerName=Aurora v{#Version}
+AppVersion={#Version}
+AppVerName=Aurora {#Version}
 AppPublisher=Anton Pupkov
 AppPublisherURL=http://www.project-aurora.com/
 AppSupportURL=https://github.com/antonpup/Aurora/issues/
@@ -19,13 +19,13 @@ DefaultDirName={pf64}\Aurora
 DisableProgramGroupPage=yes
 DisableWelcomePage=no
 OutputDir=..\
-OutputBaseFilename=Aurora-setup-v{#Version}
+OutputBaseFilename=Aurora-setup-{#Version}
 Compression=lzma
 SolidCompression=yes
 UninstallDisplayIcon={app}\Aurora.exe
 SetupIconFile=Aurora_updater.ico
 WizardImageFile=Aurora-wizard.bmp
-CloseApplications=no 
+CloseApplications=no
 // ^ This line is important because when it is set to yes it would ask user to exit Aurora. But uninstaller/installer already kills Aurora processes.
 
 //#include <idp.iss>
@@ -42,14 +42,14 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 //Source: "unzipper.dll"; Flags: dontcopy
 Source: "..\Build\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-//AfterInstall: ExtractMe('{app}\Aurora-v{#Version}.zip', '{app}')
+//AfterInstall: ExtractMe('{app}\Aurora-{#Version}.zip', '{app}')
 Source: "vcredist_x86.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 Source: "vcredist_x64.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 
 [Icons]
 Name: "{commonprograms}\Aurora"; Filename: "{app}\Aurora.exe"
 Name: "{commondesktop}\Aurora"; Filename: "{app}\Aurora.exe"; Tasks: desktopicon
-  
+
 [Code]
 //procedure unzip(src, target: AnsiString);
 //external 'unzip@files:unzipper.dll stdcall delayload';
@@ -69,7 +69,7 @@ end;
 
 function CmdLineParamExists(const Value: string): Boolean; // stackoverflow.com/a/48349992
 var
-  I: Integer;  
+  I: Integer;
 begin
   Result := False;
   for I := 1 to ParamCount do
@@ -129,9 +129,9 @@ begin
         TaskKill('Aurora.exe');
         TaskKill('Aurora-SkypeIntegration.exe');
         TaskKill('Aurora-Updater.exe');
-        
+
         sUnInstallString := GetUninstallString();
-        if sUnInstallString <> '' then 
+        if sUnInstallString <> '' then
           begin
             sUnInstallString := RemoveQuotes(sUnInstallString);
             ExecuteHidden(sUnInstallString,'/verysilent /keepsettings /keepstartuptask');
@@ -179,7 +179,7 @@ begin
           end;
       end;
   end;
-end; 
+end;
 
 
 #IFDEF UNICODE
@@ -192,7 +192,7 @@ function VCRedistX64NeedsInstall: Boolean;
 begin
   Result := not RegKeyExists(HKEY_LOCAL_MACHINE,'SOFTWARE\Wow6432Node\Microsoft\VisualStudio\14.0\VC\Runtimes\x64');
 end;
-                                             
+
 function VCRedistX86NeedsInstall: Boolean;
 begin
   Result := not RegKeyExists(HKEY_LOCAL_MACHINE,'SOFTWARE\Wow6432Node\Microsoft\VisualStudio\14.0\VC\Runtimes\x86');
@@ -209,6 +209,6 @@ Type: filesandordirs; Name: "{pf}\Aurora"
 
 
 ;This works if it is installed in custom location
-Type: files; Name: "{app}\*"; 
+Type: files; Name: "{app}\*";
 Type: filesandordirs; Name: "{app}"
 
